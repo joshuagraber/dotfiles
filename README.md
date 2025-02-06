@@ -1,16 +1,19 @@
 # JDG Dotfiles
+
 My dotfiles and configs
 
 Inspired by [Sheharyar Naseer](https://github.com/sheharyarn/dotfiles) and [Kent C. Dodds](https://github.com/kentcdodds/dotfiles).
 
 ## Quickstart
 ### If setting up a new machine
+
 - Run the following, and the script should handle everything
 ```shell
 curl https://raw.githubusercontent.com/joshuagraber/dotfiles/HEAD/.macos | bash
 ```
 
 ### If adding to an existing machine
+
 - Clone the repository into `~/.dotfiles`
 ```shell
 git clone https://github.com/joshuagraber/dotfiles ~/.dotfiles
@@ -34,7 +37,7 @@ ln -s ~/.dotfiles/git/.gitconfig.global ~/.gitconfig
 vim
 ```shell
 brew install neovim
-sudo bash ${HOME}/.dotfiles/vim/installer.sh
+bash ${HOME}/.dotfiles/vim/installer.sh
 ```
 vlc
 ```shell
