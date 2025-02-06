@@ -1,0 +1,67 @@
+[user]
+  name = Joshua D. Graber
+  email = 68428039+joshuagraber@users.noreply.github.com
+
+[pull]
+  rebase = false
+[push]
+  default = current
+	autoSetupRemote = true
+[core]
+  pager = delta -- --theme="night-owlish"
+	excludesfile = ~/.dotfiles/git/.gitignore.global
+[merge]
+    tool = nvim
+[mergetool "nvim"]
+    cmd = nvim -f '+DiffviewOpen' \"$MERGED\"
+    trustExitCode = true
+
+[delta]
+    navigate = true
+    light = false
+    side-by-side = true
+    line-numbers = true
+    decorations = true
+    features = line-numbers decorations
+    whitespace-error-style = 22 reverse
+    plus-style = syntax "#003800"
+    minus-style = syntax "#3f0001"
+
+[diff]
+    colorMoved = default
+    tool = delta
+
+[diff "json"]
+    textconv = jq '.'
+
+[diff "word"]
+    textconv = pandoc --to=markdown
+    prompt = false
+
+[interactive]
+    diffFilter = delta --color-only
+[color]
+	ui = true
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
+[color "diff"]
+	meta = 11
+	frag = magenta bold
+	commit = yellow bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+[init]
+	defaultBranch = main
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+# Machine-specific Configs
+[includeIf "gitdir:~/"]
+  path = ~/.gitconfig_local
