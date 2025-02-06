@@ -60,7 +60,7 @@ local lsp_flags = {
 -- START LSP SETUP FUNCTIONS
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript"},
+    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar" },
     automatic_installation = true,
     handlers = {
         -- Generic handler for any server without a specific configuration.
@@ -130,6 +130,30 @@ require("mason-lspconfig").setup({
                     }
                 }
             })
+        end,
+        volar = function()
+            require('lspconfig').volar.setup({
+                on_attach = on_attach,
+                filetypes = {'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue', 'json'},
+                init_options = {
+                    typescript = {
+                        tsdk = vim.fn.expand('$HOME/node_modules/typescript/lib')
+                        -- Or if using nvm: vim.fn.expand('$HOME/.nvm/versions/node/*/lib/node_modules/typescript/lib')
+                    },
+                    vue = {
+                        hybridMode = true,  -- Enable template type checking
+                        complete = {
+                            codeActionKinds = {
+                                "quickfix",
+                                "refactor",
+                                "refactor.extract",
+                                "refactor.inline",
+                                "refactor.rewrite"
+                            }
+                        }
+                    }
+                }
+            })
         end
     }
 })
@@ -137,7 +161,25 @@ require("mason-lspconfig").setup({
 local null_ls = require("null-ls")
 
 null_ls.setup({
-    sources = {null_ls.builtins.formatting.stylua, null_ls.builtins.formatting.prettier}
+    sources = {       
+    null_ls.builtins.formatting.stylua,
+    null_ls.builtins.formatting.prettier,
+    -- null_ls.builtins.diagnostics.eslint,
+    -- null_ls.builtins.code_actions.eslint,
+    null_ls.builtins.formatting.prettier.with({
+        filetypes = {
+            "javascript",
+            "typescript",
+            "vue",
+            "css",
+            "scss",
+            "html",
+            "json",
+            "yaml",
+            "markdown"
+        },
+    }),
+}
 })
 
 require("nvim-lightbulb").setup({
