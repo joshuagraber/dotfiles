@@ -103,7 +103,7 @@ ln -s "${HOME}/.dotfiles/zsh/.zshrc" "${HOME}/.zshrc"
 ## Use zsh aliases/functions in other apps like Vim:
 ln -s "${HOME}/.dotfiles/zsh/simple-load.sh" "${HOME}/.zshenv"
 # Vim setup - use vim installer script to symlink files
-sudo bash ${HOME}/.dotfiles/vim/installer.sh
+bash ${HOME}/.dotfiles/vim/installer.sh
 # VLC config
 ln -s ~/.dotfiles/vlc/vlcrc ~/Library/Preferences/org.videolan.vlc/vlcrc
 # TODO: add symlinks to remaining dotfiles here.
