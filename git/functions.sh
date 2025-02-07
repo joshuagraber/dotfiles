@@ -5,6 +5,7 @@
 
 # avoid collisions with zsh git plugin
 unalias gc 2>/dev/null
+unalias gca 2>/dev/null
 unalias gta 2>/dev/null
 unalias gbda 2>/dev/null
 
@@ -34,6 +35,13 @@ gc() {
   fi
 }
 
+gca() {
+  if [[ $# -eq 0 ]] ; then
+    git commit --verbose --all
+  else
+    git commit --verbose --all -m "$1"
+  fi
+}
 
 # Tags with Annotations
 gta() {
