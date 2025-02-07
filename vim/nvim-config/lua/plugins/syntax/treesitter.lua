@@ -14,8 +14,10 @@ configs.setup({
 	-- this is a list of default support you need.
 	ensure_installed = {
 		"lua",
+		"javascript",
 		"typescript",
-    "html",
+		"tsx",
+		"html",
     "css",
     "rust",
 	}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages

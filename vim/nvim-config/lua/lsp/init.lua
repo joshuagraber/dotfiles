@@ -60,7 +60,7 @@ local lsp_flags = {
 -- START LSP SETUP FUNCTIONS
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar" },
+    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar", "prettier" },
     automatic_installation = true,
     handlers = {
         -- Generic handler for any server without a specific configuration.
@@ -154,6 +154,55 @@ require("mason-lspconfig").setup({
                     }
                 }
             })
+        end,
+        tsserver = function()
+            require('lspconfig').tsserver.setup({
+                on_attach = on_attach,
+                filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
+                cmd = { "typescript-language-server", "--stdio" },
+                init_options = {
+                    preferences = {
+                        disableSuggestions = false,
+                    },
+                    tsserver = {
+                        useSyntaxServer = "auto"
+                    }
+                },
+                settings = {
+                    typescript = {
+                        format = {
+                            indentSize = 2,
+                            convertTabsToSpaces = true,
+                            tabSize = 2
+                        },
+                        inlayHints = {
+                            includeInlayEnumMemberValueHints = true,
+                            includeInlayFunctionLikeReturnTypeHints = true,
+                            includeInlayFunctionParameterTypeHints = true,
+                            includeInlayParameterNameHints = "all",
+                            includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                            includeInlayPropertyDeclarationTypeHints = true,
+                            includeInlayVariableTypeHints = true,
+                        },
+                    },
+                    javascript = {
+                        format = {
+                            indentSize = 2,
+                            convertTabsToSpaces = true,
+                            tabSize = 2
+                        },
+                        inlayHints = {
+                            includeInlayEnumMemberValueHints = true,
+                            includeInlayFunctionLikeReturnTypeHints = true,
+                            includeInlayFunctionParameterTypeHints = true,
+                            includeInlayParameterNameHints = "all",
+                            includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                            includeInlayPropertyDeclarationTypeHints = true,
+                            includeInlayVariableTypeHints = true,
+                        },
+                    }
+                }
+            })
         end
     }
 })
@@ -162,24 +211,36 @@ local null_ls = require("null-ls")
 
 null_ls.setup({
     sources = {       
-    null_ls.builtins.formatting.stylua,
-    null_ls.builtins.formatting.prettier,
-    -- null_ls.builtins.diagnostics.eslint,
-    -- null_ls.builtins.code_actions.eslint,
-    null_ls.builtins.formatting.prettier.with({
-        filetypes = {
-            "javascript",
-            "typescript",
-            "vue",
-            "css",
-            "scss",
-            "html",
-            "json",
-            "yaml",
-            "markdown"
-        },
-    }),
-}
+        null_ls.builtins.formatting.stylua,
+        null_ls.builtins.formatting.prettier,
+        -- null_ls.builtins.diagnostics.eslint,
+        -- null_ls.builtins.code_actions.eslint,
+        null_ls.builtins.formatting.prettier.with({
+            filetypes = {
+                "javascript",
+                "javascriptreact",
+                "typescript",
+                "typescriptreact",
+                "vue",
+                "css",
+                "scss",
+                "html",
+                "json",
+                "yaml",
+                "markdown",
+                "graphql",
+            },
+        }),
+        null_ls.builtins.diagnostics.eslint.with({
+            filetypes = {
+                "javascript",
+                "javascriptreact",
+                "typescript",
+                "typescriptreact",
+                "vue",
+            },
+        }),
+    }
 })
 
 require("nvim-lightbulb").setup({
