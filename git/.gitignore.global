@@ -1,9 +1,6 @@
 # Mac
 .DS_Store
 
-# VSCode
-.vscode/
-
 # npm
 npm-debug.log
 
