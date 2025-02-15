@@ -60,13 +60,15 @@ local lsp_flags = {
 -- START LSP SETUP FUNCTIONS
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar", "prettier" },
+    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar" },
     automatic_installation = true,
     handlers = {
         -- Generic handler for any server without a specific configuration.
         function(server_name)
             require('lspconfig')[server_name].setup({
                 on_attach = on_attach,
+                capabilities = require('cmp_nvim_lsp').default_capabilities(),
+                flags = lsp_flags,
                 native_lsp = {
                     enabled = true,
                     virtual_text = {
@@ -108,6 +110,7 @@ require("mason-lspconfig").setup({
         lua_ls = function()
             require('lspconfig').lua_ls.setup({
                 on_attach = on_attach,
+                capabilities = capabilities,
                 settings = {
                     Lua = {
                         diagnostics = {
@@ -134,7 +137,7 @@ require("mason-lspconfig").setup({
         volar = function()
             require('lspconfig').volar.setup({
                 on_attach = on_attach,
-                filetypes = {'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue', 'json'},
+                filetypes = {'vue'},
                 init_options = {
                     typescript = {
                         tsdk = vim.fn.expand('$HOME/node_modules/typescript/lib')
@@ -158,6 +161,7 @@ require("mason-lspconfig").setup({
         tsserver = function()
             require('lspconfig').tsserver.setup({
                 on_attach = on_attach,
+                capabilities = capabilities,
                 filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
                 cmd = { "typescript-language-server", "--stdio" },
                 init_options = {
@@ -212,16 +216,11 @@ local null_ls = require("null-ls")
 null_ls.setup({
     sources = {       
         null_ls.builtins.formatting.stylua,
-        null_ls.builtins.formatting.prettier,
+        -- null_ls.builtins.formatting.prettier,
         -- null_ls.builtins.diagnostics.eslint,
-        -- null_ls.builtins.code_actions.eslint,
+        null_ls.builtins.code_actions.eslint,
         null_ls.builtins.formatting.prettier.with({
             filetypes = {
-                "javascript",
-                "javascriptreact",
-                "typescript",
-                "typescriptreact",
-                "vue",
                 "css",
                 "scss",
                 "html",
@@ -230,7 +229,27 @@ null_ls.setup({
                 "markdown",
                 "graphql",
             },
+            -- Add default prettier config here
+            extra_args = {
+                "--single-quote",
+                "--tab-width", "2",
+                "--print-width", "100",
+            },
+            
         }),
+        -- This ensures formatting doesn't run multiple times
+        on_attach = function(client, bufnr)
+            if client.supports_method("textDocument/formatting") then
+                vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                    group = augroup,
+                    buffer = bufnr,
+                    callback = function()
+                        vim.lsp.buf.format({ bufnr = bufnr })
+                    end,
+                })
+            end
+        end,
         null_ls.builtins.diagnostics.eslint.with({
             filetypes = {
                 "javascript",
