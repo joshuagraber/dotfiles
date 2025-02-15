@@ -60,7 +60,7 @@ local lsp_flags = {
 -- START LSP SETUP FUNCTIONS
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "gdscript", "volar" },
+    ensure_installed = {"lua_ls", "rust_analyzer", "ts_ls", "cssls", "eslint", "html", "marksman", "jdtls", "volar", "tailwindcss"},
     automatic_installation = true,
     handlers = {
         -- Generic handler for any server without a specific configuration.
@@ -93,11 +93,6 @@ require("mason-lspconfig").setup({
         end,
         rust_analyzer = function()
             require('lspconfig').rust_analyzer.setup({
-                on_attach = on_attach
-            })
-        end,
-        gdscript = function()
-            require'lspconfig'.gdscript.setup({
                 on_attach = on_attach
             })
         end,
@@ -139,9 +134,9 @@ require("mason-lspconfig").setup({
                 on_attach = on_attach,
                 filetypes = {'vue'},
                 init_options = {
-                    typescript = {
-                        tsdk = vim.fn.expand('$HOME/node_modules/typescript/lib')
-                        -- Or if using nvm: vim.fn.expand('$HOME/.nvm/versions/node/*/lib/node_modules/typescript/lib')
+                    typescript = {                       
+                    -- tsdk = vim.fn.expand('$HOME/node_modules/typescript/lib')
+                    vim.fn.expand('$HOME/.nvm/versions/node/*/lib/node_modules/typescript/lib')
                     },
                     vue = {
                         hybridMode = true,  -- Enable template type checking
@@ -158,8 +153,8 @@ require("mason-lspconfig").setup({
                 }
             })
         end,
-        tsserver = function()
-            require('lspconfig').tsserver.setup({
+        ts_ls = function()
+            require('lspconfig').ts_ls.setup({
                 on_attach = on_attach,
                 capabilities = capabilities,
                 filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
@@ -207,7 +202,7 @@ require("mason-lspconfig").setup({
                     }
                 }
             })
-        end
+        end,
     }
 })
 
