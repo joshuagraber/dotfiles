@@ -37,7 +37,7 @@ echo "brew installing stuff"
 # delta: A fantastic diff tool https://github.com/dandavison/delta
 # switchaudio-osx: allows switching the audio device via the command line https://github.com/deweller/switchaudio-osx
 brew install git hub ripgrep imagemagick watchman tree \
-git-delta switchaudio-osx ffmpeg flyctl httpie jq zsh
+git-delta switchaudio-osx ffmpeg flyctl httpie jq zsh deno
 
 
 echo "installing nvm"
