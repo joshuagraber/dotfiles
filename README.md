@@ -34,6 +34,12 @@ brew install git
 mv ~/.gitconfig ~/.gitconfig_local
 ln -s ~/.dotfiles/git/.gitconfig.global ~/.gitconfig
 ```
+ghostty
+```shell
+brew install --cask ghostty
+mkdir - p "${XDG_CONFIG_HOME}/ghostty"
+ln -s "${HOME}/.dotfiles/ghostty/config" "${XDG_CONFIG_HOME}/ghostty/config"
+```
 vim
 ```shell
 brew install neovim
@@ -44,4 +50,3 @@ vlc
 brew install --cask vlc
 ln -s ~/.dotfiles/vlc/vlcrc ~/Library/Preferences/org.videolan.vlc/vlcrc
 ```
-
