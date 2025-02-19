@@ -155,6 +155,25 @@ require("mason-lspconfig").setup({
         }
       })
     end,
+    tailwindcss = function()
+      require('lspconfig').tailwindcss.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+          tailwindCSS = {
+            lint = {
+              cssConflict = "warning",
+              invalidApply = "error",
+              invalidScreen = "error",
+              invalidVariant = "error",
+              invalidConfigPath = "error"
+            },
+            validate = true
+          }
+        },
+        filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
+      })
+    end,    
     ts_ls = function()
       require('lspconfig').ts_ls.setup({
         on_attach = on_attach,
