@@ -5,6 +5,7 @@ export ZSH=$HOME/.oh-my-zsh
 export dotfiles=$HOME/.dotfiles
 export DOTFILES=$dotfiles
 export ZSH_CUSTOM=$DOTFILES/zsh/custom
+export XDG_CONFIG_HOME=$HOME/.config
 export PATH=/usr/local/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
 ## Deno

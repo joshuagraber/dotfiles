@@ -22,6 +22,11 @@ echo "Hello $(whoami)! Let's get you set up."
 
 echo "mkdir -p ${HOME}/code"
 mkdir -p "${HOME}/code"
+echo "mkdir -p ${HOME}/.config"
+mkdir -p ${HOME}/.config
+echo "Creating XDG_CONFIG_HOME variable"
+export XDG_CONFIG_HOME=$HOME/.config
+
 
 echo "installing homebrew"
 # install homebrew https://brew.sh
@@ -102,6 +107,9 @@ curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | 
 ln -s "${HOME}/.dotfiles/zsh/.zshrc" "${HOME}/.zshrc"
 ## Use zsh aliases/functions in other apps like Vim:
 ln -s "${HOME}/.dotfiles/zsh/simple-load.sh" "${HOME}/.zshenv"
+# Ghostty
+mkdir -p "${XDG_CONFIG_HOME}/ghostty"
+ln -s "${HOME}/.dotfiles/ghostty/config" "${XDG_CONFIG_HOME}/ghostty/config"
 # Vim setup - use vim installer script to symlink files
 bash ${HOME}/.dotfiles/vim/installer.sh
 # VLC config
