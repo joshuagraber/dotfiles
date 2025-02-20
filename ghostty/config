@@ -47,4 +47,4 @@ keybind=cmd+shift+down=resize_split:down,10
 keybind=cmd+shift+left=resize_split:left,10
 keybind=cmd+shift+right=resize_split:right,10
 # Quick terminal
-keybind = global:ctrl+grave_accent=toggle_quick_terminal
+keybind = global:cmd+grave_accent=toggle_quick_terminal
