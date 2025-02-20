@@ -21,8 +21,11 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
 -- after the language server attaches to the current buffer
 -- this is the default on_attach function, which can be overridden below.
 local on_attach = function(client, bufnr)
-  -- Attach navbuddy on every server
-  navbuddy.attach(client, bufnr)
+  -- Attach navbuddy only if the server supports documentSymbols
+  if client.server_capabilities.documentSymbolProvider then
+    local navbuddy = require("nvim-navbuddy")
+    navbuddy.attach(client, bufnr)
+  end
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
