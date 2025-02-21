@@ -252,40 +252,49 @@ require("mason-lspconfig").setup({
 
 local null_ls = require("null-ls")
 
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
 null_ls.setup({
   sources = {
     null_ls.builtins.formatting.stylua,
-    -- null_ls.builtins.formatting.prettier,
-    -- null_ls.builtins.diagnostics.eslint,
-    null_ls.builtins.code_actions.eslint,
     null_ls.builtins.formatting.prettier.with({
-      filetypes = { "css", "scss", "html", "json", "yaml", "markdown", "graphql" },
-      -- Add default prettier config here
+      filetypes = { "css", "scss", "html", "json", "yaml", "markdown", "graphql", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
       extra_args = { "--single-quote", "--tab-width", "2", "--print-width", "100" }
-
     }),
-    -- This ensures formatting doesn't run multiple times
-    on_attach = function(client, bufnr)
-      if client.supports_method("textDocument/formatting") then
-        vim.api.nvim_clear_autocmds({
-          group = augroup,
-          buffer = bufnr
-        })
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          group = augroup,
-          buffer = bufnr,
-          callback = function()
-            vim.lsp.buf.format({
-              bufnr = bufnr
-            })
-          end
-        })
-      end
-    end,
+    null_ls.builtins.code_actions.eslint,
     null_ls.builtins.diagnostics.eslint.with({
       filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
-    })
-  }
+    }),
+    null_ls.builtins.formatting.eslint.with({
+      filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
+    }),
+  },
+  on_attach = function(client, bufnr)
+    if client.supports_method("textDocument/formatting") then
+      vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup,
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({
+            bufnr = bufnr,
+            filter = function(formatting_client)
+              return formatting_client.name == "prettier"
+            end,
+            async = true,
+            callback = function()
+              vim.lsp.buf.format({
+                bufnr = bufnr,
+                filter = function(formatting_client)
+                  return formatting_client.name == "eslint"
+                end,
+              })
+            end,
+          })
+        end,
+      })
+    end
+  end,
 })
 
 require("nvim-lightbulb").setup({
