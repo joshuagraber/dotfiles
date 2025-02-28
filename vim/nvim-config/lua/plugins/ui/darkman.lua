@@ -7,7 +7,7 @@ require 'darkman'.setup({
   change_background = true,
   send_user_event = false,
   colorscheme = {
-    light = "catpuccin-latte",
-    dark = "catpuccin-macchiato"
+    light = "catppuccin-latte",
+    dark = "catppuccin-mocha"
   },
 })
