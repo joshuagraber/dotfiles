@@ -37,14 +37,32 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-## Keybindings
-# New split
-keybind=cmd+opt+v=new_split:right
-keybind=cmd+opt+h=new_split:down
-# Resize split divider in any direction
-keybind=cmd+shift+up=resize_split:up,10
-keybind=cmd+shift+down=resize_split:down,10
-keybind=cmd+shift+left=resize_split:left,10
-keybind=cmd+shift+right=resize_split:right,10
-# Quick terminal
+## Keybindings see https://ghostty.org/docs/config/keybind/reference
+### New split
+keybind=cmd+opt+shift+s=new_split:right
+keybind=cmd+opt+s=new_split:down
+### Resize split divider in any direction
+keybind=cmd+shift+k=resize_split:up,10
+keybind=cmd+shift+j=resize_split:down,10
+keybind=cmd+shift+h=resize_split:left,10
+keybind=cmd+shift+l=resize_split:right,10
+keybind=cmd+option+k=goto_split:up
+keybind=cmd+option+j=goto_split:down
+keybind=cmd+option+h=goto_split:left
+keybind=cmd+option+l=goto_split:right
+### Quick terminal
 keybind = global:cmd+grave_accent=toggle_quick_terminal
+
+
+## Fonts
+font-family = Intel One Mono
+font-size = 14
+window-inherit-font-size = true
+
+## Theme
+theme = dark: catppuccin-mocha, light: catppuccin-latte
+
+## Layout
+quick-terminal-position = center
+window-padding-y = 12
+window-padding-x = 12
