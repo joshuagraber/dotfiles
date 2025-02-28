@@ -28,6 +28,9 @@ vim.api.nvim_set_keymap('n', '<leader>mp', ':MarkdownPreview<CR>', { noremap = t
 vim.api.nvim_set_keymap('n', '<leader>ms', ':MarkdownPreviewStop<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>mt', ':MarkdownPreviewToggle<CR>', { noremap = true, silent = true })
 
+-- Open git remote
+vim.api.nvim_set_keymap('n', '<leader>gb', '<cmd>lua require"gitlinker".get_buf_range_url("n", {action_callback = require"gitlinker.actions".open_in_browser})<cr>', {silent = true})
+vim.api.nvim_set_keymap('v', '<leader>gb', '<cmd>lua require"gitlinker".get_buf_range_url("v", {action_callback = require"gitlinker.actions".open_in_browser})<cr>', {})
 -- As a side note, some additional keymaps exist in the handlers.lua file
 -- for the language server commands such as gd for go to definition
 

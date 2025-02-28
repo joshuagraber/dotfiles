@@ -297,6 +297,29 @@ null_ls.setup({
   end,
 })
 
+-- gitlinker https://github.com/ruifm/gitlinker.nvim
+require("gitlinker").setup({
+  opts = {
+    -- Add your configuration options here
+    mappings = "<leader>gy", -- Default keymap to generate the link
+  },
+  callbacks = {
+    ["github.com"] = require("gitlinker.hosts").get_github_type_url,
+    ["gitlab.com"] = require("gitlinker.hosts").get_gitlab_type_url,
+    -- Add more hosts if needed
+  },
+  -- Default remote to use
+  remote = nil,
+  -- Default branch to use
+  branch = "main",
+  -- Default action to perform
+  action_callback = require("gitlinker.actions").open_in_browser,
+  -- Print the URL after performing the action
+  print_url = true,
+  -- Mapping to call the action
+  mappings = "<leader>gy",
+})
+
 require("nvim-lightbulb").setup({
   autocmd = {
     enabled = true
