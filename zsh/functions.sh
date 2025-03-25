@@ -43,6 +43,43 @@ jcurl() {
   curl -s "$@" | jq .
 }
 
+# Pretty Print JSON from either stdin or clipboard
+jclip() {
+    # Check if jq is installed
+    if ! command -v jq &> /dev/null; then
+        echo "Error: jq is not installed. Please install jq to use this script."
+        return 1
+    fi
+
+    # Try to get JSON from clipboard first (pbpaste for Mac)
+    if command -v pbpaste &> /dev/null; then
+        json=$(pbpaste)
+        # If clipboard is empty, read from stdin
+        if [ -z "$json" ]; then
+            json=$(cat)
+        fi
+    # For Linux systems with xsel
+    elif command -v xsel &> /dev/null; then
+        json=$(xsel -b)
+        # If clipboard is empty, read from stdin
+        if [ -z "$json" ]; then
+            json=$(cat)
+        fi
+    # If no clipboard command is available, fall back to stdin
+    else
+        json=$(cat)
+    fi
+
+    # Try to format the JSON and color it
+    if echo "$json" | jq '.' -C > /dev/null 2>&1; then
+        echo "$json" | jq '.' -C
+    else
+        echo "Error: Invalid JSON input"
+        return 1
+    fi
+}
+
+
 # List all of current user's processes
 myps() { ps $@ -u $USER -o pid,%cpu,%mem,start,time,bsdtime,command ; }
 

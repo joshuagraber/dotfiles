@@ -2,7 +2,7 @@
 
 # Paths and Variables
 export ZSH=$HOME/.oh-my-zsh
-export dotfiles=$HOME/.dotfiles
+local dotfiles=$HOME/.dotfiles
 export DOTFILES=$dotfiles
 export ZSH_CUSTOM=$DOTFILES/zsh/custom
 export XDG_CONFIG_HOME=$HOME/.config
