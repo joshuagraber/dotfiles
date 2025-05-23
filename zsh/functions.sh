@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # FUNCTIONS
 # =========
 
@@ -36,6 +34,73 @@ get-platform() {
   esac
 }
 
+# prepend text from either stdn or clipboard to file
+prepend() {
+    local usage_text=$(cat << 'EOF'
+Usage: echo 'text to prepend' | prepend filename
+
+e.g.
+echo "text to prepend" | prepend filename
+
+e.g.
+cat << EOL | prepend .ignored/foo.txt
+This is a multi-line
+string I want to prepend
+to my test file.
+EOL
+EOF
+)
+
+    local input_content
+
+    if [ -t 0 ]; then
+        # Try to get clipboard content
+        if command -v pbpaste &>/dev/null; then
+            # macOS
+            input_content=$(pbpaste)
+        elif command -v xsel &>/dev/null; then
+            # Linux with xsel
+            input_content=$(xsel -b)
+        elif command -v xclip &>/dev/null; then
+            # Linux with xclip
+            input_content=$(xclip -selection clipboard -o)
+        else
+            echo "Error: No input provided through stdin and no clipboard tool available"
+            echo "$usage_text"
+            return 1
+        fi
+
+        if [ -z "$input_content" ]; then
+            echo 'Error: No input in stdin or clipboard'
+            echo "$usage_text"
+            return 1
+        fi
+    fi
+
+    # Check if filename argument is provided
+    if [ -z "$1" ]; then
+        echo "Error: No target file specified"
+        echo "$usage_text"
+        return 1
+    fi
+
+    # Check if target file exists
+    if [ ! -f "$1" ]; then
+        echo "Error: File '$1' does not exist"
+        return 1
+    fi
+
+    # Perform the prepend operation
+    if [ -t 0 ]; then
+        # Use clipboard content if stdin is empty
+        echo "$input_content" | cat - "$1" > temp && mv temp "$1"
+    else
+        # Use stdin content
+        cat - "$1" > temp && mv temp "$1"
+    fi
+}
+
+
 
 # Pretty Print JSON Curl Responses
 # Need to have jq installed
@@ -43,38 +108,36 @@ jcurl() {
   curl -s "$@" | jq .
 }
 
-# Pretty Print JSON from either stdin or clipboard
-jclip() {
+# Pretty Print JSON from clipboard
+jp() {
     # Check if jq is installed
     if ! command -v jq &> /dev/null; then
         echo "Error: jq is not installed. Please install jq to use this script."
         return 1
     fi
 
-    # Try to get JSON from clipboard first (pbpaste for Mac)
+    # Try clipboard on Mac
     if command -v pbpaste &> /dev/null; then
         json=$(pbpaste)
-        # If clipboard is empty, read from stdin
-        if [ -z "$json" ]; then
-            json=$(cat)
-        fi
-    # For Linux systems with xsel
+    # Try xsel on Linux
     elif command -v xsel &> /dev/null; then
         json=$(xsel -b)
-        # If clipboard is empty, read from stdin
-        if [ -z "$json" ]; then
-            json=$(cat)
-        fi
-    # If no clipboard command is available, fall back to stdin
     else
-        json=$(cat)
+        echo "Error: No clipboard tool available"
+        return 1
+    fi
+
+    # Check if we got any input
+    if [ -z "$json" ]; then
+        echo "Error: Empty clipboard"
+        return 1
     fi
 
     # Try to format the JSON and color it
     if echo "$json" | jq '.' -C > /dev/null 2>&1; then
         echo "$json" | jq '.' -C
     else
-        echo "Error: Invalid JSON input"
+        echo "Error: Invalid JSON in clipboard"
         return 1
     fi
 }
@@ -94,7 +157,7 @@ search() {
   if [[ $# -eq 0 ]] ; then
     echo "no arguments provided"
     echo "usage: search string"
-    echo ""
+    echo ''
   else
     rg --files $RG_DEFAULT_ARGS | rg -i "$@"
   fi
@@ -119,7 +182,7 @@ search-replace() {
   if [[ $# -eq 0 ]] ; then
     echo "no replace regex provided"
     echo "usage: search-replace 's/match_regex/replace_regex/g'"
-    echo ""
+    echo ''
 
   else
     if [[ "$(get-platform)" == "linux" ]]; then
@@ -133,7 +196,7 @@ search-replace() {
     else
       echo "provide a valid match and replace regex"
       echo "usage: search_replace 's/match_regex/replace_regex/g'"
-      echo ""
+      echo ''
     fi
   fi
 }
@@ -176,7 +239,7 @@ edit() {
 
 # Use $ as a function
 function $ {
-    eval "$@"
+  eval "$@"
 }
 
 
@@ -257,7 +320,7 @@ transfer() {
             zipfile=$( mktemp -t transferXXX.zip )
             cd $(dirname $file) && zip -r -q - $(basename $file) >> $zipfile
             curl --progress-bar --upload-file "$zipfile" "https://transfer.sh/$basefile.zip" >> $tmpfile
-            rm -f $zipfile
+            \rm -f $zipfile
         else
             # transfer file
             curl --progress-bar --upload-file "$file" "https://transfer.sh/$basefile" >> $tmpfile
@@ -271,6 +334,59 @@ transfer() {
     cat $tmpfile
 
     # cleanup
-    rm -f $tmpfile
+    \rm -f $tmpfile
+}
+
+# ---------------------------------------------------------------------------
+# ff – Open a URL in Firefox Developer Edition
+#        1) If an argument is passed, use it as the URL.
+#        2) Otherwise pull a URL candidate from the clipboard.
+#           (Supports macOS `pbpaste`, Linux `xclip` or `xsel`).
+#     - A minimal check ensures the URL starts with http:// or https://
+# ---------------------------------------------------------------------------
+goto () {
+    local url
+
+    # 1. Argument takes precedence
+    if [[ -n "$1" ]]; then
+        url="$1"
+    else
+        # 2. Fallback to clipboard depending on platform / tool availability
+        if command -v pbpaste >/dev/null 2>&1; then
+            url="$(pbpaste)"
+        elif command -v xclip >/dev/null 2>&1; then
+            url="$(xclip -o -selection clipboard)"
+        elif command -v xsel >/dev/null 2>&1; then
+            url="$(xsel -b)"
+        else
+            echo "goto: no clipboard utility found (pbpaste/xclip/xsel)" >&2
+            return 1
+        fi
+    fi
+
+    # Basic validation – must begin with http:// or https://
+    if [[ ! "$url" =~ ^https?:// ]]; then
+        echo "goto: no valid URL supplied or found in clipboard" >&2
+        return 1
+    fi
+
+    # Try to launch Firefox Developer Edition (cross-platform best-effort)
+    if command -v firefox-developer-edition >/dev/null 2>&1; then
+        firefox-developer-edition "$url" &
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: open the specific app bundle if it exists
+        if [ -d "/Applications/Choosy.app" ] || \
+           [ -d "$HOME/Applications/Firefox Developer Edition.app" ]; then
+            open -a "Choosy" "$url" &
+        else
+            echo "goto: Choosy not found in /Applications" >&2
+            return 1
+        fi
+    elif command -v choosy >/dev/null 2>&1; then
+        choosy "$url" &
+    else
+        echo "goto: Choosy not installed" >&2
+        return 1
+    fi
 }
 

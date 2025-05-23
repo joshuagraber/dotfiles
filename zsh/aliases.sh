@@ -7,6 +7,7 @@
 alias  l='ls -FG'
 alias la='ls -FGalh'
 alias ll='ls -FG1'
+alias rm='echo "This is not the command you are looking for. Try \`del <path-to-dir-or-file>\` to use trash-cli"; false'
 
 # Directories
 alias      _cd="z"
@@ -47,4 +48,5 @@ alias sudo='sudo '
 
 # Git
 alias git=hub
+
 

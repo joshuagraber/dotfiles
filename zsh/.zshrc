@@ -1,4 +1,6 @@
 #!/bin/zsh
+# Amazon Q pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
 
 # Paths and Variables
 export ZSH=$HOME/.oh-my-zsh
@@ -19,6 +21,11 @@ PATH="$PATH:./node_modules/.bin:../node_modules/.bin:../../node_modules/.bin:../
 PATH="$PATH:$HOME/.bin:$HOME/.local/bin";
 ## dotfile bin
 PATH="$PATH:$DOTFILES/.bin";
+## terraform env mgr
+PATH="$HOME/.tfenv/bin:$PATH"
+## trash-cli
+PATH="/opt/homebrew/opt/trash-cli/bin:$PATH"
+
 
 # Editor
 export EDITOR="nvim"
@@ -121,3 +128,6 @@ done
 [[ -a ~/.localrc ]] && source ~/.localrc
 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Amazon Q post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
