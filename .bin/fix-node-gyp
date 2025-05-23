@@ -1,5 +1,100 @@
-sudo rm -rf $(xcode-select -print-path)
-sudo rm -rf /Library/Developer/CommandLineTools
-xcode-select --install
-npm explore npm -g -- npm install node-gyp@latest
-npm explore npm -g -- npm explore npm-lifecycle -- npm install node-gyp@latest
+#!/bin/bash
+
+echo "Starting node-gyp environment setup..."
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to install dependencies using apt
+install_with_apt() {
+    echo "Installing dependencies with apt..."
+    sudo apt-get update
+    sudo apt-get install -y python3 make g++ pkg-config cairo-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+}
+
+# Function to install dependencies using yum
+install_with_yum() {
+    echo "Installing dependencies with yum..."
+    sudo yum update -y
+    sudo yum groupinstall -y "Development Tools"
+    sudo yum install -y python3 cairo-devel pango-devel libjpeg-turbo-devel giflib-devel
+}
+
+# Function to install dependencies using pacman
+install_with_pacman() {
+    echo "Installing dependencies with pacman..."
+    sudo pacman -Syu --noconfirm
+    sudo pacman -S --noconfirm python3 make gcc pkgconf cairo pango libjpeg-turbo giflib librsvg
+}
+
+# Function to install dependencies using homebrew
+install_with_homebrew() {
+    echo "Installing dependencies with Homebrew..."
+    brew install pkg-config cairo pango libpng jpeg giflib librsvg
+}
+
+# Check if Xcode Command Line Tools are installed (macOS only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! xcode-select -p &> /dev/null; then
+        echo "Installing Xcode Command Line Tools..."
+        xcode-select --install
+        echo "Please wait for Xcode Command Line Tools installation to complete and press any key to continue..."
+        read -n 1
+    fi
+    sudo xcode-select --reset
+fi
+
+# Install system dependencies based on available package manager
+if command_exists brew; then
+    install_with_homebrew
+elif command_exists apt; then
+    install_with_apt
+elif command_exists yum; then
+    install_with_yum
+elif command_exists pacman; then
+    install_with_pacman
+else
+    echo "Warning: No supported package manager found. You may need to install dependencies manually."
+    echo "Required dependencies: python3, make, gcc/g++, pkg-config, cairo, pango, libjpeg, giflib, librsvg"
+fi
+
+# Ensure python is available
+if ! command_exists python3; then
+    echo "Warning: Python 3 not found. Attempting to create python symlink..."
+    if command_exists python; then
+        sudo ln -s $(which python) /usr/local/bin/python3
+    else
+        echo "Error: No Python installation found. Please install Python 3."
+        exit 1
+    fi
+fi
+
+# Clean npm cache and install/update node-gyp
+if command_exists npm; then
+    echo "Cleaning npm cache..."
+    npm cache clean --force
+
+    echo "Installing/updating node-gyp globally..."
+    npm install -g node-gyp@latest
+elif command_exists yarn; then
+    echo "Cleaning yarn cache..."
+    yarn cache clean
+
+    echo "Installing/updating node-gyp globally..."
+    yarn global add node-gyp@latest
+else
+    echo "Error: Neither npm nor yarn found. Please install Node.js and npm/yarn."
+    exit 1
+fi
+
+# Reset node-gyp configuration
+echo "Resetting node-gyp configuration..."
+node-gyp clean
+
+echo "node-gyp environment has been reset and updated."
+echo "If you continue to experience issues, you may need to:"
+echo "1. Check your Node.js version compatibility"
+echo "2. Run 'node-gyp rebuild' in your project directory"
+echo "3. Check specific package requirements for additional dependencies"
