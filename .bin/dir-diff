@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Check if two directory paths and an output file path are provided
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <directory1> <directory2>"
+    exit 1
+fi
+
+DIR1="$1"
+DIR2="$2"
+
+temp_file="./temp-file"
+
+# Check if directories exist
+if [ ! -d "$DIR1" ]; then
+    echo "Error: Directory $DIR1 does not exist"
+    exit 1
+fi
+
+if [ ! -d "$DIR2" ]; then
+    echo "Error: Directory $DIR2 does not exist"
+    exit 1
+fi
+
+# Files in DIR1 but not in DIR2
+echo "Files in $DIR1 but not in $DIR2:" >> "$temp_file"
+find "$DIR1" -type f | sed "s|^$DIR1/||" | sort > /tmp/dir1.txt
+find "$DIR2" -type f | sed "s|^$DIR2/||" | sort > /tmp/dir2.txt
+comm -23 /tmp/dir1.txt /tmp/dir2.txt >> "$temp_file"
+
+# Files in DIR2 but not in DIR1
+echo -e "\nFiles in $DIR2 but not in $DIR1:" >> "$temp_file"
+comm -13 /tmp/dir1.txt /tmp/dir2.txt >> "$temp_file"
+
+# Files with different content
+echo -e "\nFiles with different content:" >> "$temp_file"
+comm -12 /tmp/dir1.txt /tmp/dir2.txt > /tmp/common.txt
+while read -r file; do
+    if ! cmp -s "$DIR1/$file" "$DIR2/$file"; then
+        echo "$file" >> "$temp_file"
+    fi
+done < /tmp/common.txt
+
+# Clean up
+rm -f /tmp/dir1.txt /tmp/dir2.txt /tmp/common.txt
+
+cat $temp_file
+rm $temp_file
