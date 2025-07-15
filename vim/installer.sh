@@ -43,6 +43,9 @@ detect_package_manager() {
     fi
 }
 
+# Package definitions
+PACKAGES=("neovim" "ripgrep" "fzf" "git" "lazygit")
+
 # Install dependencies based on OS
 install_dependencies() {
     print_message "Installing dependencies"
@@ -51,17 +54,26 @@ install_dependencies() {
     
     case $PKG_MANAGER in
         "brew")
-            brew install neovim ripgrep fzf lazygit || error_exit "Failed to install dependencies"
+            for pkg in "${PACKAGES[@]}"; do
+                brew install $pkg || print_message "Warning: Failed to install $pkg"
+            done
             ;;
         "apt-get")
             sudo apt-get update
-            sudo apt-get install -y neovim ripgrep fzf lazygit || error_exit "Failed to install dependencies"
+            for pkg in "${PACKAGES[@]}"; do
+                sudo apt-get install -y $pkg || print_message "Warning: Failed to install $pkg"
+            done
             ;;
         "dnf")
-            sudo dnf install -y neovim ripgrep fzf lazygit || error_exit "Failed to install dependencies"
+            for pkg in "${PACKAGES[@]}"; do
+                sudo dnf install -y $pkg || print_message "Warning: Failed to install $pkg"
+            done
             ;;
         "pacman")
-            sudo pacman -Sy neovim ripgrep fzf lazygit || error_exit "Failed to install dependencies"
+            sudo pacman -Sy
+            for pkg in "${PACKAGES[@]}"; do
+                sudo pacman -S --noconfirm $pkg || print_message "Warning: Failed to install $pkg"
+            done
             ;;
     esac
 }
