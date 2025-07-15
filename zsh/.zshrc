@@ -1,6 +1,11 @@
 #!/bin/zsh
 # Amazon Q pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+# Platform-specific paths
+if [[ "$(uname -s)" == "Linux" ]]; then
+    [[ -f "${HOME}/.config/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/.config/amazon-q/shell/zshrc.pre.zsh"
+else
+    [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+fi
 
 # Paths and Variables
 export ZSH=$HOME/.oh-my-zsh
@@ -73,13 +78,17 @@ setopt INC_APPEND_HISTORY
 source $ZSH/oh-my-zsh.sh
 
 
-# Load Homebrew
-export BREW_COMMAND="/opt/homebrew/bin/brew"
-[[ -s "$BREW_COMMAND" ]] && eval "$($BREW_COMMAND shellenv)"
+# Load Homebrew (macOS only)
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    export BREW_COMMAND="/opt/homebrew/bin/brew"
+    [[ -s "$BREW_COMMAND" ]] && eval "$($BREW_COMMAND shellenv)"
+fi
 
 
-# Enable iTerm2 Shell Integration
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# Enable iTerm2 Shell Integration (macOS only)
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+fi
 
 
 # NVM Configs
@@ -130,4 +139,8 @@ done
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Amazon Q post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+if [[ "$(uname -s)" == "Linux" ]]; then
+    [[ -f "${HOME}/.config/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/.config/amazon-q/shell/zshrc.post.zsh"
+else
+    [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+fi

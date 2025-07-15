@@ -1,0 +1,84 @@
+# Alacritty Configuration
+# Similar style to your Ghostty setup
+
+# Window settings
+window:
+  padding:
+    x: 10
+    y: 10
+  dynamic_padding: true
+  decorations: full
+  startup_mode: Windowed
+  opacity: 0.95
+
+# Font configuration
+font:
+  normal:
+    family: "JetBrainsMono Nerd Font"
+    style: Regular
+  bold:
+    family: "JetBrainsMono Nerd Font"
+    style: Bold
+  italic:
+    family: "JetBrainsMono Nerd Font"
+    style: Italic
+  bold_italic:
+    family: "JetBrainsMono Nerd Font"
+    style: Bold Italic
+  size: 14.0
+  offset:
+    x: 0
+    y: 0
+  glyph_offset:
+    x: 0
+    y: 0
+
+# Colors (Dracula)
+colors:
+  primary:
+    background: '#282a36'
+    foreground: '#f8f8f2'
+  cursor:
+    text: '#44475a'
+    cursor: '#f8f8f2'
+  normal:
+    black:   '#000000'
+    red:     '#ff5555'
+    green:   '#50fa7b'
+    yellow:  '#f1fa8c'
+    blue:    '#bd93f9'
+    magenta: '#ff79c6'
+    cyan:    '#8be9fd'
+    white:   '#bfbfbf'
+  bright:
+    black:   '#4d4d4d'
+    red:     '#ff6e67'
+    green:   '#5af78e'
+    yellow:  '#f4f99d'
+    blue:    '#caa9fa'
+    magenta: '#ff92d0'
+    cyan:    '#9aedfe'
+    white:   '#e6e6e6'
+
+# Cursor
+cursor:
+  style:
+    shape: Block
+    blinking: On
+  blink_interval: 750
+  unfocused_hollow: true
+
+# Scrolling
+scrolling:
+  history: 10000
+  multiplier: 3
+
+# Key bindings
+key_bindings:
+  - { key: V,        mods: Control|Shift, action: Paste            }
+  - { key: C,        mods: Control|Shift, action: Copy             }
+  - { key: Insert,   mods: Shift,         action: PasteSelection   }
+  - { key: Key0,     mods: Control,       action: ResetFontSize    }
+  - { key: Plus,     mods: Control,       action: IncreaseFontSize }
+  - { key: Minus,    mods: Control,       action: DecreaseFontSize }
+  - { key: F11,      mods: None,          action: ToggleFullscreen }

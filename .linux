@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+
+# ~/.linux — Linux setup script for dotfiles
+# Run without downloading:
+# curl https://raw.githubusercontent.com/joshuagraber/dotfiles/HEAD/.linux | bash
+
+# Ask for the administrator password upfront
+sudo -v
+
+# Keep-alive: update existing `sudo` time stamp until script has finished
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
+########################################################################
+#                            Customizations                            #
+########################################################################
+echo "Hello $(whoami)! Let's get you set up on Linux."
+
+echo "mkdir -p ${HOME}/code"
+mkdir -p "${HOME}/code"
+echo "mkdir -p ${HOME}/.config"
+mkdir -p "${HOME}/.config"
+echo "Creating XDG_CONFIG_HOME variable"
+export XDG_CONFIG_HOME=$HOME/.config
+
+# Detect Linux distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    DISTRO=$ID
+else
+    echo "Cannot detect Linux distribution"
+    exit 1
+fi
+
+echo "Detected Linux distribution: $DISTRO"
+
+# PACKAGE MANAGER SETUP
+case $DISTRO in
+    ubuntu|debian)
+        echo "Setting up for Ubuntu/Debian..."
+        sudo apt update
+        sudo apt install -y curl wget git build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release
+        INSTALL_CMD="sudo apt install -y"
+        ;;
+    fedora|centos|rhel)
+        echo "Setting up for Fedora/RHEL/CentOS..."
+        sudo dnf update -y
+        sudo dnf install -y curl wget git gcc gcc-c++ make
+        INSTALL_CMD="sudo dnf install -y"
+        ;;
+    arch|manjaro)
+        echo "Setting up for Arch/Manjaro..."
+        sudo pacman -Syu --noconfirm
+        sudo pacman -S --noconfirm curl wget git base-devel
+        INSTALL_CMD="sudo pacman -S --noconfirm"
+        ;;
+    *)
+        echo "Unsupported distribution: $DISTRO"
+        echo "Please install packages manually"
+        INSTALL_CMD="echo 'Manual install required for'"
+        ;;
+esac
+
+# INSTALL COMMON PACKAGES
+echo "Installing common packages..."
+case $DISTRO in
+    ubuntu|debian)
+        $INSTALL_CMD ripgrep tree git-delta ffmpeg httpie jq zsh deno \
+        sed trash-cli neovim imagemagick watchman alacritty
+        ;;
+    fedora|centos|rhel)
+        $INSTALL_CMD ripgrep tree git-delta ffmpeg httpie jq zsh \
+        util-linux-user trash-cli neovim ImageMagick watchman alacritty
+        # Note: deno might need manual installation on some RHEL variants
+        ;;
+    arch|manjaro)
+        $INSTALL_CMD ripgrep tree git-delta ffmpeg httpie jq zsh \
+        trash-cli neovim imagemagick watchman deno alacritty
+        ;;
+esac
+
+# SNAP PACKAGES (if available)
+if command -v snap >/dev/null 2>&1; then
+    echo "Installing snap packages..."
+    sudo snap install code --classic
+    sudo snap install docker
+fi
+
+# FLATPAK PACKAGES (alternative for GUI apps)
+if command -v flatpak >/dev/null 2>&1; then
+    echo "Installing flatpak packages..."
+    flatpak install -y flathub org.mozilla.firefox
+    flatpak install -y flathub com.google.Chrome
+    flatpak install -y flathub org.videolan.VLC
+    flatpak install -y flathub com.slack.Slack
+fi
+
+# NODE SETUP (same as macOS)
+echo "Setting up node..."
+echo "installing nvm"
+PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash'
+
+# Load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Install and use multiple Node.js versions
+echo "Installing Node.js versions..."
+nvm install 20.1.0
+nvm install 20.9.0 
+nvm install 21.6.1 
+nvm install node # latest version
+
+# Set a default version
+nvm alias default node
+nvm use default
+
+echo "Node.js versions installed:"
+nvm ls
+
+echo "installing a few global npm packages for each configured node version"
+NODE_VERSIONS="20.1.0 20.9.0 21.6.1 node" 
+GLOBAL_PACKAGES="serve fkill-cli npm-check-updates yarn@1.22.19"
+
+for version in $NODE_VERSIONS; do
+    echo "Setting up Node $version..."
+    nvm use $version
+    npm install --global $GLOBAL_PACKAGES
+done
+
+nvm use default
+echo "Node setup complete"
+
+# MISC CONFIGURATION
+echo "setting up cron job for trash-cli to empty trash automatically every 30 days"
+(crontab -l 2>/dev/null; echo "@daily $(which trash-empty) 30") | crontab -
+
+echo "Generating a new SSH key for GitHub"
+ssh-keygen -t ed25519 -C "joshua.d.graber@gmail.com" -f ~/.ssh/id_ed25519
+eval "$(ssh-agent -s)"
+touch ~/.ssh/config
+echo "Host *
+ AddKeysToAgent yes
+ IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
+ssh-add ~/.ssh/id_ed25519
+echo "run 'cat ~/.ssh/id_ed25519.pub' and paste that into GitHub"
+
+# SET UP DOTFILES
+echo "cloning dotfiles"
+git clone git@github.com:joshuagraber/dotfiles.git "${HOME}/.dotfiles"
+
+echo "Installing zsh"
+# ZSH
+# Install `oh-my-zsh` (http://ohmyz.sh/)
+curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+echo "Symlinking zshrc and simpleload.sh"
+ln -sf "${HOME}/.dotfiles/zsh/.zshrc" "${HOME}/.zshrc"
+## Use zsh aliases/functions in other apps like Vim:
+ln -sf "${HOME}/.dotfiles/zsh/simple-load.sh" "${HOME}/.zshenv"
+
+# Skip Ghostty setup on Linux
+echo "Skipping Ghostty config (not available on Linux)"
+
+# Set up Alacritty instead
+echo "Setting up Alacritty terminal emulator"
+mkdir -p "${HOME}/.config/alacritty"
+ln -sf "${HOME}/.dotfiles/alacritty/alacritty.yml" "${HOME}/.config/alacritty/alacritty.yml"
+
+# Vim setup - use vim installer script to symlink files
+echo "running neovim installer"
+bash ${HOME}/.dotfiles/vim/installer.sh
+
+# VLC config (adjust path for Linux)
+echo "symlinking VLC config"
+mkdir -p ~/.config/vlc
+ln -sf ~/.dotfiles/vlc/vlcrc ~/.config/vlc/vlcrc
+
+# Codex config
+echo "symlinking Codex config"
+mkdir -p ~/.codex
+ln -sf ~/.dotfiles/codex/config.json ~/.codex/config.json
+ln -sf ~/.dotfiles/codex/instructions.md ~/.codex/instructions.md
+
+echo "Linux setup complete!"
+
+printf "TODO:\n\
+Manual installations needed: \n\
+  - Terminal emulator of choice (alacritty, kitty, etc.) \n\
+  - Browser bookmarks and histories from your backup \n\
+  - Any GUI applications not available via package manager \n\
+  - Configure your desktop environment \n\
+\n\
+Restart your shell or run: source ~/.zshrc\n\
+Copy git config from your backup/re-login \n\
+Copy .npmrc and .yarnrc from your backup/re-login \n\
+Login to literally everything \n\
+"
