@@ -27,3 +27,6 @@ Session.vim
 
 # Python
 venv
+
+# AI miscellany
+.serena/**
