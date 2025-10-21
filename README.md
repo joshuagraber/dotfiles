@@ -53,6 +53,6 @@ ln -s ~/.dotfiles/vlc/vlcrc ~/Library/Preferences/org.videolan.vlc/vlcrc
 codex
 ```shell
 mkdir -p ~/.codex
-ln -s ~/.dotfiles/codex/config.json ~/.codex/config.json
+ln -s ~/.dotfiles/codex/config.toml ~/.codex/config.toml
 ln -s ~/.dotfiles/codex/instructions.md ~/.codex/instructions.md
 ```
