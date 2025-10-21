@@ -27,13 +27,12 @@ end
 
 local packer_bootstrap = ensure_packer()
 
--- Use a protected call so we don't error out on first use
--- local status_ok, packer = pcall(require, "packer")
--- if not status_ok then
---   return
--- end
+local packer = require("packer")
+packer.init({
+    max_jobs = 10, -- limit concurrent git jobs to avoid hitting macOS file-descriptor caps
+})
 
-require("packer").startup(function(use)
+packer.startup(function(use)
     use({"wbthomason/packer.nvim"})
     use({"windwp/nvim-ts-autotag"})
 
@@ -274,6 +273,6 @@ require("packer").startup(function(use)
     end
     if packer_bootstrap then
         print("first start - running packer sync")
-        require('packer').sync()
+        packer.sync()
     end
 end)

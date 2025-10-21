@@ -1,6 +1,6 @@
 local status_ok, configs = pcall(require, "nvim-treesitter.configs")
 if not status_ok then
-	return
+  return
 end
 
 -- local autotag_ok, autotag = pcall(require, "nvim-ts-autotag")
@@ -10,48 +10,64 @@ end
 
 local parser_configs = require('nvim-treesitter.parsers').get_parser_configs()
 
+local ensure_languages = {
+  "lua",
+  "javascript",
+  "typescript",
+  "tsx",
+  "html",
+  "css",
+  "rust",
+}
+
+-- filter out parsers that are not bundled with nvim-treesitter to avoid startup errors
+local available_parsers = {}
+for _, lang in ipairs(ensure_languages) do
+  if parser_configs[lang] ~= nil then
+    table.insert(available_parsers, lang)
+  else
+    vim.schedule(function()
+      vim.notify_once(
+        string.format('nvim-treesitter: parser "%s" unavailable, skipping ensure_installed', lang),
+        vim.log.levels.WARN
+      )
+    end)
+  end
+end
+
 configs.setup({
-	-- this is a list of default support you need.
-	ensure_installed = {
-		"lua",
-		"javascript",
-		"typescript",
-		"tsx",
-		"html",
-    "css",
-    "rust",
-	}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
-	sync_install = false, -- install languages synchronously (only applied to `ensure_installed`)
-	ignore_install = { "" }, -- List of parsers to ignore installing
-	highlight = {
+  -- this is a list of default support you need.
+  ensure_installed = available_parsers, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  sync_install = false,    -- install languages synchronously (only applied to `ensure_installed`)
+  ignore_install = { "" }, -- List of parsers to ignore installing
+  highlight = {
     -- use_languagetree = true,
-		enable = true, -- false will disable the whole extension
-		-- disable = { "css", "html" }, -- list of language that will be disabled
-		-- disable = { "css" }, -- list of language that will be disabled
-		additional_vim_regex_highlighting = true,
-	},
-	autopairs = {
-		enable = true,
-	},
-	indent = { enable = true, disable = { "yaml", "css" } },
-	context_commentstring = {
-		enable = true,
-		enable_autocmd = true,
-	},
-	autotag = {
-		enable = true,
-		disable = { "xml" },
-	},
-	rainbow = {
-		enable = false,
-		colors = {
-			"Gold",
-			"Orchid",
-			"DodgerBlue",
-			-- "Cornsilk",
-			-- "Salmon",
-			-- "LawnGreen",
-		},
-		disable = { "html" },
-	},
+    enable = true, -- false will disable the whole extension
+    -- disable = { "css", "html" }, -- list of language that will be disabled
+    additional_vim_regex_highlighting = true,
+  },
+  autopairs = {
+    enable = true,
+  },
+  indent = { enable = true, disable = { "yaml", "css" } },
+  context_commentstring = {
+    enable = true,
+    enable_autocmd = true,
+  },
+  autotag = {
+    enable = true,
+    disable = { "xml" },
+  },
+  rainbow = {
+    enable = false,
+    colors = {
+      "Gold",
+      "Orchid",
+      "DodgerBlue",
+      -- "Cornsilk",
+      -- "Salmon",
+      -- "LawnGreen",
+    },
+    disable = { "html" },
+  },
 })
