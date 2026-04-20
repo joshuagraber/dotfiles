@@ -59,7 +59,7 @@ else
   require("plugins.editor.surround") -- enables surround commands! ysiw (you surround inner word)
   require("plugins.editor.navbuddy") -- enables IDE like breadcrumbs and symbol searching
   require("plugins.editor.neotree") -- custom tree plugin that just works as you expect it too.
-  require('plugins.editor.markdown') -- markdown preview
+  require("plugins.editor.markdown") -- markdown preview
 
   --------------------- UI PLUGINS ------------------------------
   --=============================================================

@@ -63,3 +63,13 @@ local python = Terminal:new({ cmd = "python", hidden = true })
 function _PYTHON_TOGGLE()
 	python:toggle()
 end
+
+local mergetool = Terminal:new({
+	cmd = "git mergetool",
+	hidden = true,
+	close_on_exit = false,
+})
+
+function _MERGETOOL_TOGGLE()
+	mergetool:toggle()
+end

@@ -60,7 +60,7 @@ font-size = 14
 window-inherit-font-size = true
 
 ## Theme
-theme = dark: catppuccin-mocha, light: catppuccin-latte
+theme = dark: Catppuccin Mocha, light: Catppuccin Latte
 
 ## Layout
 quick-terminal-position = center

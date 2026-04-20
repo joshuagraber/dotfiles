@@ -30,3 +30,5 @@ venv
 
 # AI miscellany
 .serena/**
+mcp.log
+

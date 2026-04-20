@@ -35,7 +35,12 @@ end
 if not vim.g.vscode then
   tabSwitchPrev = { "H", ":BufferPrevious<CR>", opts = opts, description = "Next Tab (alternate)" }
   tabSwitchNext = { "L", ":BufferNext<CR>", opts = opts, description = "Next Tab (alternate)" }
-  fileTreeFocus = { "<C-b>", ":Neotree toggle<CR>", description = "Toggle file tree", opts = opts }
+  fileTreeFocus = {
+    "<C-b>",
+    "<cmd>Neotree toggle reveal<cr>",
+    description = "Toggle file tree (reveal current file)",
+    opts = opts,
+  }
 end
 
 local custom_mappings = {
@@ -61,9 +66,36 @@ local custom_mappings = {
   { "<C-p>", ":Telescope git_files<CR>", opts = opts, description = "Find File" },
   { "<C-o>", ":Navbuddy<CR>", opts = opts, description = "Browse Symbols" },
 
+  -- Telescope
+  { "<leader><leader>b", ":Telescope buffers<CR>", opts = opts, description = "Browse open buffers" },
+  { "<leader><leader>g", ":Telescope live_grep<CR>", opts = opts, description = "Live grep search" },
+  {
+    "<leader><leader>G",
+    '<cmd>lua require("telescope.builtin").live_grep({ additional_args = { "--hidden", "--no-ignore" } })<CR>',
+    opts = opts,
+    description = "Live grep (include hidden & gitignored)",
+  },
+  { "<leader><leader>w", ":Telescope workspaces<CR>", opts = opts, description = "Browse workspaces" },
+
+  -- Git remote
+  { "<leader>gb", '<cmd>lua require"gitlinker".get_buf_range_url("n", {action_callback = require"gitlinker.actions".open_in_browser})<cr>', opts = opts, description = "Open file in Github (browser)" },
+  { "<leader>gb", '<cmd>lua require"gitlinker".get_buf_range_url("v", {action_callback = require"gitlinker.actions".open_in_browser})<cr>', mode = "v", opts = {}, description = "Open selection in Github (browser)" },
+
+  -- Markdown Preview
+  { "<leader>mp", ":MarkdownPreview<CR>", opts = opts, description = "Start Markdown Preview" },
+  { "<leader>ms", ":MarkdownPreviewStop<CR>", opts = opts, description = "Stop Markdown Preview" },
+  { "<leader>mt", ":MarkdownPreviewToggle<CR>", opts = opts, description = "Toggle Markdown Preview" },
+
   -- Commenting
   { "<leader><leader>c", ":CommentToggle<CR>", mode = "v", opts = opts, description = "Toggle Comment" },
   { "<leader><leader>c", ":CommentToggle<CR>", mode = "n", opts = opts, description = "Toggle Comment" },
+
+  -- Visual mode indenting (stay in indent mode)
+  { "<", "<gv", mode = "v", opts = opts, description = "Indent left (stay in visual mode)" },
+  { ">", ">gv", mode = "v", opts = opts, description = "Indent right (stay in visual mode)" },
+
+  -- Paste over selection without yanking
+  { "<leader>p", '"_dP', mode = "v", opts = opts, description = "Paste over selection (keep clipboard)" },
 
   -- folding
   { "<C-]", "za", mode = "n", opts = opts, description = "Fold Out" },
@@ -90,7 +122,8 @@ local custom_mappings = {
     opts = opts,
     description = "lsp: View Workspace Diagnostics List/View Workspace Errors",
   },
-  { "<space>d", ":TroubleToggle<CR>", opts = opts, description = "Show Diagnostics sidebar/View Errors" },
+  { "<space>dt", ":TroubleToggle<CR>", opts = opts, description = "Show Diagnostics sidebar/View Errors" },
+  { "<F2>", "<cmd>lua vim.lsp.buf.rename()<CR>", opts = opts, description = "LSP: Rename Symbol" },
   {"<space>D", description = "Goto declaration"},
   {"<space>d", description = "Goto definition"},
   {"<space>h", description = "Hover Error / Show Error Popup"},

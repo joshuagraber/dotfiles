@@ -1,4 +1,4 @@
-local status_ok, neotree = pcall(require, "neotree")
+local status_ok, neotree = pcall(require, "neo-tree")
 if not status_ok then
     return
 end
@@ -192,7 +192,9 @@ neotree.setup({
         follow_current_file = {
             enabled = true, -- This will find and focus the file in the active buffer every time
             --               -- the current file is changed while the tree is open.
-            leave_dirs_open = false -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+            -- false: when following the buffer, collapse expanded dirs that are not ancestors
+            -- of the current file (sibling branches close); path to the file stays expanded
+            leave_dirs_open = false
         },
         group_empty_dirs = false, -- when true, empty folders will be grouped together
         hijack_netrw_behavior = "open_default", -- netrw disabled, opening a directory opens neo-tree
@@ -268,7 +270,7 @@ neotree.setup({
         follow_current_file = {
             enabled = true, -- This will find and focus the file in the active buffer every time
             --              -- the current file is changed while the tree is open.
-            leave_dirs_open = false -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+            leave_dirs_open = false
         },
         group_empty_dirs = true, -- when true, empty folders will be grouped together
         show_unloaded = true,
