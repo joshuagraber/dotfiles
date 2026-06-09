@@ -1,12 +1,4 @@
 #!/bin/zsh
-# Amazon Q pre block. Keep at the top of this file.
-# Platform-specific paths
-if [[ "$(uname -s)" == "Linux" ]]; then
-    [[ -f "${HOME}/.config/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/.config/amazon-q/shell/zshrc.pre.zsh"
-else
-    [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
-fi
-
 # Paths and Variables
 export ZSH=$HOME/.oh-my-zsh
 local dotfiles=$HOME/.dotfiles
@@ -14,7 +6,6 @@ export DOTFILES=$dotfiles
 export ZSH_CUSTOM=$DOTFILES/zsh/custom
 export XDG_CONFIG_HOME=$HOME/.config
 export PATH=/usr/local/bin:$PATH
-export PATH=/usr/local/sbin:$PATH
 ## Deno
 PATH="$HOME/.deno/bin:$PATH"
 ## Yarn
@@ -137,10 +128,3 @@ done
 [[ -a ~/.localrc ]] && source ~/.localrc
 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Amazon Q post block. Keep at the bottom of this file.
-if [[ "$(uname -s)" == "Linux" ]]; then
-    [[ -f "${HOME}/.config/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/.config/amazon-q/shell/zshrc.post.zsh"
-else
-    [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-fi

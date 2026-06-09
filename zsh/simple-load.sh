@@ -28,3 +28,4 @@ elif [[ -n $ZSH_NAME ]] ; then
   done
 fi
 
+. "$HOME/.cargo/env"
