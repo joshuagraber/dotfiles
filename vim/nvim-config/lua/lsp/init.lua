@@ -35,9 +35,10 @@ local on_attach = function(client, bufnr)
   -- Create buffer-local keymaps - use nvim_buf_set_keymap for maximum compatibility
   local bufmap_opts = { noremap = true, silent = true }
   
-  -- Go to declaration (will fallback to definition if declaration not supported)
+  -- Go to definition; keep declaration on the conventional gD binding.
   local success1, err1 = pcall(function()
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>D", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufmap_opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>D", "<cmd>lua vim.lsp.buf.definition()<CR>", bufmap_opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufmap_opts)
   end)
   if not success1 then
     vim.notify("Failed to set <space>D mapping: " .. tostring(err1), vim.log.levels.ERROR)
@@ -92,7 +93,7 @@ require("mason-lspconfig").setup({
     "lua_ls",
     "rust_analyzer",
     "ts_ls",
-    -- "denols",
+    "denols",
     "cssls",
     "eslint",
     "html",
@@ -287,23 +288,23 @@ require("mason-lspconfig").setup({
         },
       })
     end,
-    -- denols = function()
-    --   require("lspconfig").denols.setup({
-    --     on_attach = on_attach,
-    --     capabilities = capabilities,
-    --     root_dir = require("lspconfig").util.root_pattern("deno.json", "deno.jsonc"),
-    --     init_options = {
-    --       lint = true,
-    --     },
-    --     suggest = {
-    --       imports = {
-    --         hosts = {
-    --           ["https://deno.land"] = true,
-    --         },
-    --       },
-    --     },
-    --   })
-    -- end,
+    denols = function()
+      require("lspconfig").denols.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        root_dir = require("lspconfig").util.root_pattern("deno.json", "deno.jsonc"),
+        init_options = {
+          lint = true,
+        },
+        suggest = {
+          imports = {
+            hosts = {
+              ["https://deno.land"] = true,
+            },
+          },
+        },
+      })
+    end,
   },
 })
 
@@ -399,8 +400,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local bufmap_opts = { noremap = true, silent = true }
     
     -- Set all LSP keymaps
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>D", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufmap_opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>D", "<cmd>lua vim.lsp.buf.definition()<CR>", bufmap_opts)
     vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>d", "<cmd>lua vim.lsp.buf.definition()<CR>", bufmap_opts)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", bufmap_opts)
     vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>h", "<cmd>lua vim.lsp.buf.hover()<CR>", bufmap_opts)
     vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>i", "<cmd>lua vim.lsp.buf.implementation()<CR>", bufmap_opts)
     vim.api.nvim_buf_set_keymap(bufnr, "n", "<C-i>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", bufmap_opts)

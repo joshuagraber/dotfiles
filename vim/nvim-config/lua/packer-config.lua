@@ -34,7 +34,8 @@ local packer_bootstrap = ensure_packer()
 --   return
 -- end
 
-require("packer").startup(function(use)
+require("packer").startup({
+  function(use)
   use({ "wbthomason/packer.nvim" })
   use({ "windwp/nvim-ts-autotag" })
 
@@ -307,4 +308,8 @@ require("packer").startup(function(use)
     print("first start - running packer sync")
     require("packer").sync()
   end
-end)
+  end,
+  config = {
+    max_jobs = 4,
+  },
+})
