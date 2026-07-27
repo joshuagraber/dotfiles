@@ -36,14 +36,16 @@ echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ${HOME}/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 echo "brew installing stuff"
-# hub: a github-specific version of git https://hub.github.com/
 # ripgrep: rg is faster than alternatives https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md
-# tree: really handy for listing out directories in text https://code2care.org/howto/display-directory-tree-mac-terminal/
+# tree: really handy for listing out directories in text
 # delta: A fantastic diff tool https://github.com/dandavison/delta
-# switchaudio-osx: allows switching the audio device via the command line https://github.com/deweller/switchaudio-osx
-brew install git hub ripgrep imagemagick watchman tree \
+# switchaudio-osx: allows switching the audio device via the command line
+# mise: polyglot version manager (replaces nvm, manages node/python/ruby/etc)
+# tenv: terraform version manager
+brew install git ripgrep imagemagick watchman tree \
 git-delta switchaudio-osx ffmpeg flyctl httpie jq zsh deno \
-gsed trash-cli
+gsed trash-cli gh lazygit fzf just neovim shellcheck \
+mise tenv colima rbenv
 
 echo "installing apps with brew --cask"
 # TODO: ADD AND REMOVE APPS AS NEEDED
@@ -51,43 +53,29 @@ brew install --cask google-chrome firefox brave-browser  \
 visual-studio-code 1password 1password-cli \
 vlc handbrake zoom \
 slack openaudible \
-docker ghostty choosy gitkracken
+ghostty choosy
 
 
-# NODE SETUP
-echo "Setting up node..."
-echo "installing nvm"
-PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash'
+# NODE SETUP (via mise)
+echo "Setting up node via mise..."
+eval "$(mise activate bash)"
 
-# Load nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+mise use --global node@20
+mise use --global node@22
+mise use --global node@24
 
-# Install and use multiple Node.js versions
-echo "Installing beginning Node.js versions..."
-nvm install 20.1.0
-nvm install 20.9.0 
-nvm install 21.6.1 
-nvm install node # latest version
+# Default to latest LTS
+mise use --global node@24
 
-# Set a default version
-nvm alias default node
-nvm use default
+# Global npm packages auto-installed per node version
+cat > "${HOME}/.default-npm-packages" << 'EOF'
+serve
+fkill-cli
+npm-check-updates
+EOF
 
-echo "Node.js versions installed:"
-nvm ls
-
-echo "installing a few global npm packages for each configured node version"
-NODE_VERSIONS="20.1.0 20.9.0 21.6.1 node" 
-GLOBAL_PACKAGES="serve fkill-cli npm-check-updates yarn@1.22.19"
-
-for version in $NODE_VERSIONS; do
-    echo "Setting up Node $version..."
-    nvm use $version
-    npm install --global $GLOBAL_PACKAGES
-done
-
-nvm use default
+echo "Installing global npm packages for current node..."
+xargs npm install --global < "${HOME}/.default-npm-packages"
 echo "Node setup complete"
 
 # MISC CONFIGURATION
@@ -230,8 +218,7 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo Hos
 # Restart automatically if the computer freezes
 # sudo systemsetup -setrestartfreeze on
 
-# Never go into computer sleep mode
-sudo systemsetup -setcomputersleep Off > /dev/null
+# Let the system sleep normally (removed: never-sleep override)
 
 # Disable Notification Center and remove the menu bar icon
 # launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist 2> /dev/null
@@ -412,10 +399,7 @@ defaults write NSGlobalDomain com.apple.springing.delay -float 0.2
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-# Disable disk image verification
-defaults write com.apple.frameworks.diskimages skip-verify -bool true
-defaults write com.apple.frameworks.diskimages skip-verify-locked -bool true
-defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
+# Disk image verification left enabled (security tradeoff not worth it)
 
 # Automatically open a new Finder window when a volume is mounted
 defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
@@ -479,8 +463,8 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 # Enable highlight hover effect for the grid view of a stack (Dock)
 defaults write com.apple.dock mouse-over-hilite-stack -bool true
 
-# Set the icon size of Dock items to 16 pixels
-defaults write com.apple.dock tilesize -int 16
+# Dock icon size (default is 48, kept reasonable)
+defaults write com.apple.dock tilesize -int 48
 
 # Change minimize/maximize window effect
 defaults write com.apple.dock mineffect -string "scale"
@@ -718,49 +702,17 @@ defaults write com.apple.mail DraftsViewerAttributes -dict-add "DisplayInThreade
 # Spotlight                                                                   #
 ###############################################################################
 
-# Hide Spotlight tray-icon (and subsequent helper)
-sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
-# Disable Spotlight indexing for any volume that gets mounted and has not yet
-# been indexed before.
-# Use `sudo mdutil -i off "/Volumes/foo"` to stop indexing any volume.
-sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
-# Change indexing order and disable some search results
-# Yosemite-specific search results (remove them if you are using macOS 10.9 or older):
-#   MENU_DEFINITION
-#   MENU_CONVERSION
-#   MENU_EXPRESSION
-#   MENU_SPOTLIGHT_SUGGESTIONS (send search queries to Apple)
-#   MENU_WEBSEARCH             (send search queries to Apple)
-#   MENU_OTHER
+# Disable sending search queries to Apple
 defaults write com.apple.spotlight orderedItems -array \
   '{"enabled" = 1;"name" = "APPLICATIONS";}' \
   '{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
   '{"enabled" = 1;"name" = "DIRECTORIES";}' \
   '{"enabled" = 1;"name" = "PDF";}' \
+  '{"enabled" = 1;"name" = "DOCUMENTS";}' \
   '{"enabled" = 1;"name" = "FONTS";}' \
-  '{"enabled" = 0;"name" = "DOCUMENTS";}' \
-  '{"enabled" = 0;"name" = "MESSAGES";}' \
-  '{"enabled" = 0;"name" = "CONTACT";}' \
-  '{"enabled" = 0;"name" = "EVENT_TODO";}' \
-  '{"enabled" = 0;"name" = "IMAGES";}' \
-  '{"enabled" = 0;"name" = "BOOKMARKS";}' \
-  '{"enabled" = 0;"name" = "MUSIC";}' \
-  '{"enabled" = 0;"name" = "MOVIES";}' \
-  '{"enabled" = 0;"name" = "PRESENTATIONS";}' \
-  '{"enabled" = 0;"name" = "SPREADSHEETS";}' \
-  '{"enabled" = 0;"name" = "SOURCE";}' \
-  '{"enabled" = 0;"name" = "MENU_DEFINITION";}' \
-  '{"enabled" = 0;"name" = "MENU_OTHER";}' \
-  '{"enabled" = 0;"name" = "MENU_CONVERSION";}' \
-  '{"enabled" = 0;"name" = "MENU_EXPRESSION";}' \
+  '{"enabled" = 1;"name" = "CONTACT";}' \
   '{"enabled" = 0;"name" = "MENU_WEBSEARCH";}' \
   '{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
-# Load new settings before rebuilding the index
-killall mds > /dev/null 2>&1
-# Make sure indexing is enabled for the main volume
-sudo mdutil -i on / > /dev/null
-# Rebuild the index from scratch
-sudo mdutil -E / > /dev/null
 
 ###############################################################################
 # Terminal & iTerm 2                                                          #
@@ -931,11 +883,8 @@ defaults write com.apple.messageshelper.MessageController SOInputLineSettings -d
 # Google Chrome & Google Chrome Canary                                        #
 ###############################################################################
 
-# Disable the all too sensitive backswipe on trackpads
-defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
-defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool false
-
-# Disable the all too sensitive backswipe on Magic Mouse
+# Trackpad swipe navigation enabled (set at top of script)
+# Disable swipe on Magic Mouse (too sensitive)
 defaults write com.google.Chrome AppleEnableMouseSwipeNavigateWithScrolls -bool false
 defaults write com.google.Chrome.canary AppleEnableMouseSwipeNavigateWithScrolls -bool false
 
@@ -959,7 +908,7 @@ set -e
 DOCK_APPS=(
   "Ghostty"
   "Visual Studio Code"
-  "GitKracken"
+
   "1Password"
   "BraveBrowser"
   "Firefox Developer Edition"
