@@ -38,7 +38,7 @@ prompt_geometry_setup() {
   autoload -U add-zsh-hook
 
   if $PROMPT_GEOMETRY_ENABLE_PLUGINS; then
-    geometry_plugin_setup
+    [[ -z $_GEOMETRY_PROMPT_PLUGINS[primary] ]] && geometry_plugin_setup
   fi
 
   # Helper functions from lib/title.zsh

@@ -28,4 +28,4 @@ elif [[ -n $ZSH_NAME ]] ; then
   done
 fi
 
-. "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
