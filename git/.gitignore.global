@@ -32,3 +32,5 @@ venv
 .serena/**
 mcp.log
 
+.claude/settings.local.json
+*superpowers
