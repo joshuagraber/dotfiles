@@ -12,9 +12,11 @@
 	excludesfile = ~/.dotfiles/git/.gitignore.global
 [merge]
   tool = nvimdiff
+[mergetool]
+  keepBackup = false
 [mergetool "nvimdiff"]
-  cmd = nvim -f -O "$LOCAL" "$MERGED" "$REMOTE" -c "1wincmd w" -c "diffthis" -c "2wincmd w" -c "diffthis" -c "3wincmd w" -c "diffthis" -c "2wincmd w"
-    trustExitCode = true
+  cmd = nvim -d -f -u ~/.dotfiles/vim/nvim-config/init-mergetool.lua "$LOCAL" "$MERGED" "$REMOTE"
+  trustExitCode = true
 
 [delta]
     navigate = true

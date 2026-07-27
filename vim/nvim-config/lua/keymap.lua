@@ -90,31 +90,29 @@ end, { silent = true })
 
 vim.keymap.set("n", "]c", function()
   if vim.wo.diff then
-    -- Use vim's built-in diff navigation
-    vim.fn.execute("normal! ]c")
-    return
+    return "]c"
   end
   local ok, gs = pcall(require, "gitsigns")
   if ok then
     pcall(gs.next_hunk)
-    return
+    return ""
   end
   vim.fn.search("^<<<<<<<", "W")
-end, { silent = true, desc = "Next diff hunk or conflict" })
+  return ""
+end, { expr = true, silent = true, desc = "Next diff hunk or conflict" })
 
 vim.keymap.set("n", "[c", function()
   if vim.wo.diff then
-    -- Use vim's built-in diff navigation
-    vim.fn.execute("normal! [c")
-    return
+    return "[c"
   end
   local ok, gs = pcall(require, "gitsigns")
   if ok then
     pcall(gs.prev_hunk)
-    return
+    return ""
   end
   vim.fn.search("^<<<<<<<", "bW")
-end, { silent = true, desc = "Previous diff hunk or conflict" })
+  return ""
+end, { expr = true, silent = true, desc = "Previous diff hunk or conflict" })
 
 vim.keymap.set("n", "<leader>gm", function()
   if _G._MERGETOOL_TOGGLE then
