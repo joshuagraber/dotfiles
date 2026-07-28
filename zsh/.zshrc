@@ -82,36 +82,6 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 fi
 
 
-# NVM Configs
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-
-
-# NVM auto-load
-# Automatically run "nvm use" command when changing directory (https://gist.github.com/tcrammond/e52dfad4c2b36258f83f7a964af10097)
-autoload -U add-zsh-hook
-load-nvmrc() {
-  local node_version="$(nvm version)"
-  local nvmrc_path="$(nvm_find_nvmrc)"
-
-  if [ -n "$nvmrc_path" ]; then
-    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-    if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install
-    elif [ "$nvmrc_node_version" != "$node_version" ]; then
-      nvm use
-    fi
-  elif [ "$node_version" != "$(nvm version default)" ]; then
-    echo "Reverting to nvm default version"
-    nvm use default
-  fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
-
-
-
 # Load my .(z)sh files
 typeset -U my_aliases
 typeset -U my_functions
@@ -126,5 +96,3 @@ done
 
 # Load .localrc for SUPER SECRET STUFF (at the end)
 [[ -a ~/.localrc ]] && source ~/.localrc
-
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
