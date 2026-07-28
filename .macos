@@ -97,7 +97,7 @@ echo "Installing zsh"
 # ZSH
 # Install `oh-my-zsh` (http://ohmyz.sh/)
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-# SYMLINKS — interactive, pick what to link
+# SYMLINKS - interactive, pick what to link
 echo ""
 echo "=== Symlink Setup ==="
 
