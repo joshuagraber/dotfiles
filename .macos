@@ -215,7 +215,7 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -r -domain local -domain system -domain user
 
 # Display ASCII control characters using caret notation in standard text views
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -506,10 +506,7 @@ defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 # Show indicator lights for open applications in the Dock
 defaults write com.apple.dock show-process-indicators -bool true
 
-# Wipe all (default) app icons from the Dock
-# This is only really useful when setting up a new Mac, or if you don’t use
-# the Dock to launch apps.
-defaults write com.apple.dock persistent-apps -array
+# Dock apps are set in the "Add apps to dock" section below
 
 # Show only open applications in the Dock
 defaults write com.apple.dock static-only -bool true
@@ -964,42 +961,35 @@ APP_PATHS=(
 
 __app_path() {
   for ((i = 0; i < ${#APP_PATHS[@]}; i++)); do
-    local full_path="${APP_PATHS[$i]}/$@.app"
-
+    local full_path="${APP_PATHS[$i]}/$*.app"
     if [[ -d "$full_path" ]]; then
-      printf "$full_path"
+      printf '%s' "$full_path"
       return 0
     fi
   done
 }
 
-
-# Helper to generate config for individual dock items
-__dock_config() {
-  printf "%s%s%s%s%s" \
-         "<dict><key>tile-data</key><dict><key>file-data</key><dict>" \
-         "<key>_CFURLString</key><string>" \
-         "$@" \
-         "</string><key>_CFURLStringType</key><integer>0</integer>" \
-         "</dict></dict></dict>"
+__add_dock_app() {
+  local app_path="$1"
+  local app_label="$2"
+  local url_path
+  url_path="file://${app_path// /%20}/"
+  defaults write com.apple.dock persistent-apps -array-add \
+    "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>${url_path}</string><key>_CFURLStringType</key><integer>15</integer></dict><key>file-label</key><string>${app_label}</string></dict><key>tile-type</key><string>file-tile</string></dict>"
 }
 
+# Clear existing dock apps
+defaults write com.apple.dock persistent-apps -array
 
-DOCK_ARGS=""
-for ((i = 0; i < ${#DOCK_APPS[@]}; i++)); do
-  app_name="${DOCK_APPS[$i]}"
-  full_path="$(__app_path $app_name)"
-
+for app_name in "${DOCK_APPS[@]}"; do
+  full_path="$(__app_path "$app_name")"
   if [[ -z "$full_path" ]]; then
-    # do nothing if app not found
-    >&2 echo "Error: Path not found for '$app_name'"
+    >&2 echo "Warning: App not found for dock: '$app_name'"
   else
-    DOCK_ARGS+="'$(__dock_config "$full_path")' "
+    __add_dock_app "$full_path" "$app_name"
   fi
 done
 
-
-eval "defaults write com.apple.dock persistent-apps -array $DOCK_ARGS"
 killall Dock
 echo ""
 echo "Done! Favorite apps pinned to Dock!"
