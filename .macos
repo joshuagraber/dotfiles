@@ -98,18 +98,12 @@ echo "Installing zsh"
 # Install `oh-my-zsh` (http://ohmyz.sh/)
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 # SYMLINKS — interactive, pick what to link
-declare -A SYMLINKS=(
-  ["zshrc"]="${HOME}/.dotfiles/zsh/.zshrc:${HOME}/.zshrc"
-  ["zshenv (aliases/functions in vim etc)"]="${HOME}/.dotfiles/zsh/simple-load.sh:${HOME}/.zshenv"
-  ["ghostty config"]="${HOME}/.dotfiles/ghostty/config:${XDG_CONFIG_HOME}/ghostty/config"
-  ["vlc config"]="${HOME}/.dotfiles/vlc/vlcrc:${HOME}/Library/Preferences/org.videolan.vlc/vlcrc"
-)
-
 echo ""
 echo "=== Symlink Setup ==="
-for name in "${!SYMLINKS[@]}"; do
-  IFS=':' read -r src dest <<< "${SYMLINKS[$name]}"
-  read -p "Link ${name}? (${src} → ${dest}) [Y/n] " answer
+
+__maybe_link() {
+  local name="$1" src="$2" dest="$3"
+  read -p "Link ${name}? [Y/n] " answer
   case "${answer}" in
     [nN]*) echo "  Skipped ${name}" ;;
     *)
@@ -118,9 +112,13 @@ for name in "${!SYMLINKS[@]}"; do
       echo "  Linked ${name}"
       ;;
   esac
-done
+}
 
-# Neovim installer (separate — it does its own symlinking)
+__maybe_link "zshrc" "${HOME}/.dotfiles/zsh/.zshrc" "${HOME}/.zshrc"
+__maybe_link "zshenv" "${HOME}/.dotfiles/zsh/simple-load.sh" "${HOME}/.zshenv"
+__maybe_link "ghostty config" "${HOME}/.dotfiles/ghostty/config" "${XDG_CONFIG_HOME}/ghostty/config"
+__maybe_link "vlc config" "${HOME}/.dotfiles/vlc/vlcrc" "${HOME}/Library/Preferences/org.videolan.vlc/vlcrc"
+
 read -p "Run neovim installer? [Y/n] " answer
 case "${answer}" in
   [nN]*) echo "  Skipped neovim" ;;
