@@ -48,9 +48,8 @@ gsed trash-cli gh lazygit fzf just neovim shellcheck \
 mise tenv colima rbenv
 
 echo "installing apps with brew --cask"
-# TODO: ADD AND REMOVE APPS AS NEEDED
 brew install --cask google-chrome firefox brave-browser  \
-visual-studio-code 1password 1password-cli \
+visual-studio-code claude-code \
 vlc handbrake zoom \
 slack openaudible \
 ghostty choosy
@@ -83,7 +82,7 @@ echo "setting up cron job for trash-cli to empty trash automatically every 30 da
 (crontab -l ; echo "@daily $(which trash-empty) 30") | crontab -
 
 echo "Generating a new SSH key for GitHub"
-ssh-keygen -t ed25519 -C "joshua.d.graber@gmail.com" -f ~/.ssh/id_ed25519
+ssh-keygen -t ed25519 -C "code+gh@joshuadgraber.com" -f ~/.ssh/id_ed25519
 eval "$(ssh-agent -s)"
 touch ~/.ssh/config
 echo "Host *\n AddKeysToAgent yes\n UseKeychain yes\n IdentityFile ~/.ssh/id_ed25519" | tee ~/.ssh/config
@@ -98,26 +97,35 @@ echo "Installing zsh"
 # ZSH
 # Install `oh-my-zsh` (http://ohmyz.sh/)
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-echo "Symlinking zshrc and simpleload.sh"
-ln -s "${HOME}/.dotfiles/zsh/.zshrc" "${HOME}/.zshrc"
-## Use zsh aliases/functions in other apps like Vim:
-ln -s "${HOME}/.dotfiles/zsh/simple-load.sh" "${HOME}/.zshenv"
-# Ghostty
-echo "Symlinking ghostty config"
-mkdir -p "${XDG_CONFIG_HOME}/ghostty"
-ln -s "${HOME}/.dotfiles/ghostty/config" "${XDG_CONFIG_HOME}/ghostty/config"
-# Vim setup - use vim installer script to symlink files
-echo "running neovim installer"
-bash ${HOME}/.dotfiles/vim/installer.sh
-# VLC config
-echo "symlinking VLC config"
-ln -s ~/.dotfiles/vlc/vlcrc ~/Library/Preferences/org.videolan.vlc/vlcrc
-# Codex config
-echo "symlinking Codex config"
-mkdir -p ~/.codex
-ln -s ~/.dotfiles/codex/config.json ~/.codex/config.json
-ln -s ~/.dotfiles/codex/instructions.md ~/.codex/instructions.md
-# TODO: add symlinks to remaining dotfiles here.
+# SYMLINKS — interactive, pick what to link
+declare -A SYMLINKS=(
+  ["zshrc"]="${HOME}/.dotfiles/zsh/.zshrc:${HOME}/.zshrc"
+  ["zshenv (aliases/functions in vim etc)"]="${HOME}/.dotfiles/zsh/simple-load.sh:${HOME}/.zshenv"
+  ["ghostty config"]="${HOME}/.dotfiles/ghostty/config:${XDG_CONFIG_HOME}/ghostty/config"
+  ["vlc config"]="${HOME}/.dotfiles/vlc/vlcrc:${HOME}/Library/Preferences/org.videolan.vlc/vlcrc"
+)
+
+echo ""
+echo "=== Symlink Setup ==="
+for name in "${!SYMLINKS[@]}"; do
+  IFS=':' read -r src dest <<< "${SYMLINKS[$name]}"
+  read -p "Link ${name}? (${src} → ${dest}) [Y/n] " answer
+  case "${answer}" in
+    [nN]*) echo "  Skipped ${name}" ;;
+    *)
+      mkdir -p "$(dirname "${dest}")"
+      ln -sf "${src}" "${dest}"
+      echo "  Linked ${name}"
+      ;;
+  esac
+done
+
+# Neovim installer (separate — it does its own symlinking)
+read -p "Run neovim installer? [Y/n] " answer
+case "${answer}" in
+  [nN]*) echo "  Skipped neovim" ;;
+  *) bash "${HOME}/.dotfiles/vim/installer.sh" ;;
+esac
 
 
 
