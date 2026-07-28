@@ -42,17 +42,38 @@ echo "brew installing stuff"
 # switchaudio-osx: allows switching the audio device via the command line
 # mise: polyglot version manager (replaces nvm, manages node/python/ruby/etc)
 # tenv: terraform version manager
-brew install git ripgrep imagemagick watchman tree \
-git-delta switchaudio-osx ffmpeg flyctl httpie jq zsh deno \
-gsed trash-cli gh lazygit fzf just neovim shellcheck \
-mise tenv colima rbenv
+BREW_FORMULAE=(
+  git ripgrep imagemagick watchman tree
+  git-delta switchaudio-osx ffmpeg flyctl httpie jq zsh deno
+  gsed trash-cli gh lazygit fzf just neovim shellcheck
+  mise tenv colima rbenv
+)
+
+for formula in "${BREW_FORMULAE[@]}"; do
+  brew install "$formula" || echo "  ⚠ Failed to install: $formula"
+done
 
 echo "installing apps with brew --cask"
-brew install --cask google-chrome firefox brave-browser  \
-visual-studio-code claude-code \
-vlc handbrake zoom \
-slack openaudible \
-ghostty choosy
+CASK_APPS=(
+  google-chrome
+  firefox
+  firefox-developer-edition
+  brave-browser
+  visual-studio-code
+  claude-code
+  1password
+  vlc
+  handbrake
+  zoom
+  slack
+  openaudible
+  ghostty
+  choosy
+)
+
+for cask in "${CASK_APPS[@]}"; do
+  brew install --cask "$cask" || echo "  ⚠ Failed to install cask: $cask"
+done
 
 
 # NODE SETUP (via mise)
@@ -294,8 +315,9 @@ defaults write http://com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag 
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 2
 
 # Use scroll gesture with the Ctrl (^) modifier key to zoom
-defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
-defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
+# NOTE: Requires Full Disk Access for terminal app on macOS Sequoia+
+defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true 2>/dev/null
+defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144 2>/dev/null
 # Follow the keyboard focus while zoomed in
 # defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 
@@ -574,26 +596,31 @@ defaults write com.apple.LaunchServices/com.apple.launchservices.secure LSHandle
 defaults write com.choosyosx.choosy SUAutomaticallyUpdate -bool true
 defaults write com.choosyosx.choosy SUSendProfileInfo -bool false
 defaults write com.choosyosx.choosy launchAtLogin -bool true
-# Choosy - set browsers array
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/Applications/Brave Browser.app","type":"ChoosyBrowser"}'
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/Applications/Firefox Developer Edition.app","type":"ChoosyBrowser"}'
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/Applications/Firefox.app","type":"ChoosyBrowser"}'
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/Applications/Google Chrome.app","type":"ChoosyBrowser"}'
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app","type":"ChoosyBrowser"}'
-defaults write com.choosyosx.choosy browsers -array-add '{"path":"/Applications/iTerm.app","type":"ChoosyBrowser"}'
+# Choosy - set browsers array (single-quote JSON for defaults to parse correctly)
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/Applications/Brave Browser.app"; "type" = "ChoosyBrowser"; }'
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/Applications/Firefox Developer Edition.app"; "type" = "ChoosyBrowser"; }'
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/Applications/Firefox.app"; "type" = "ChoosyBrowser"; }'
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/Applications/Google Chrome.app"; "type" = "ChoosyBrowser"; }'
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app"; "type" = "ChoosyBrowser"; }'
+defaults write com.choosyosx.choosy browsers -array-add \
+  '{ "path" = "/Applications/Ghostty.app"; "type" = "ChoosyBrowser"; }'
 # Add testing/development URLs behavior
-defaults write com.choosyosx.choosy behaviors -array-add '{
-    "name": "Testing Links",
-    "pattern": "(localhost|test|dev)",
-    "browser": {"path":"/Applications/Brave Browser.app","type":"ChoosyBrowser"},
-    "enabled": true
-}'
+defaults write com.choosyosx.choosy behaviors -array-add \
+  '{ "name" = "Testing Links"; "pattern" = "(localhost|test|dev)"; "browser" = { "path" = "/Applications/Brave Browser.app"; "type" = "ChoosyBrowser"; }; "enabled" = 1; }'
 
 
 
 ###############################################################################
 # Safari & WebKit                                                             #
+# NOTE: On macOS Sonoma+, Safari prefs are sandboxed. These commands require  #
+# Full Disk Access granted to the terminal app, otherwise they silently fail. #
 ###############################################################################
+{
 
 # Privacy: don’t send search queries to Apple
 defaults write com.apple.Safari UniversalSearchEnabled -bool false
@@ -678,6 +705,8 @@ defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 
 # Update extensions automatically
 defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+
+} 2>/dev/null
 
 ###############################################################################
 # Mail                                                                        #
@@ -905,18 +934,13 @@ defaults write com.google.Chrome.canary AppleEnableMouseSwipeNavigateWithScrolls
 ###############################################################################
 # Add apps to dock                                                            #
 ###############################################################################
-# OSX Dock
-# ========
-
-set -e
 
 # Apps to pin to dock
 DOCK_APPS=(
   "Ghostty"
   "Visual Studio Code"
-
   "1Password"
-  "BraveBrowser"
+  "Brave Browser"
   "Firefox Developer Edition"
   "Google Chrome"
   "Safari"

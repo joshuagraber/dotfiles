@@ -131,12 +131,18 @@ copy_config_files() {
 # Install plugins
 install_plugins() {
     print_message "Installing Neovim plugins"
-    
-    # Install plugins headlessly
-    nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' || error_exit "Failed to install plugins"
-    
+
+    # Install plugins headlessly with timeout (Packer can hang in headless mode)
+    timeout 120 nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+    local exit_code=$?
+    if [ $exit_code -eq 124 ]; then
+        print_message "Warning: Plugin install timed out after 120s — run :PackerSync manually in nvim"
+    elif [ $exit_code -ne 0 ]; then
+        print_message "Warning: Plugin install exited with code $exit_code — run :PackerSync manually in nvim"
+    fi
+
     # Compile packer
-    nvim --headless -c 'PackerCompile' -c 'q' || error_exit "Failed to compile plugins"
+    timeout 30 nvim --headless -c 'PackerCompile' -c 'q'
 }
 
 # Main installation process
